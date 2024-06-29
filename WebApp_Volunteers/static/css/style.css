@@ -1,0 +1,227 @@
+/* Univertsal Styling */
+body {
+    font-family: Georgia, Helvetica, Arial, sans-serif;
+    margin: 0;
+    /* padding: 0px 15%; */
+    background-color: white;
+}
+
+body * {
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.content {
+    margin: 15px 20%;
+}
+
+.title {
+    display: none;
+}
+
+h1 {
+    width:100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    color: rgb(33, 103, 147);
+}
+
+nav {
+    background-color: black;
+    height: 30px;
+    justify-items: center;
+    align-items: center;
+    display: flex;
+    padding: 10px 20%;
+    justify-content: space-between;
+}
+
+nav > :is(div, a), nav > div > :is(button, a) {
+    font-size: 14px;
+    margin-left: 45px;
+    text-decoration: none;
+    color: white;  
+}
+
+nav a:hover {
+    color:lightgray;
+}
+
+.site-pages {
+    float: left;
+}
+
+.account-actions {
+    float: inline-end;
+}
+
+.event-view {
+    width: 100%
+}
+
+button {
+    background-color: purple;
+    border-radius: 7px;
+    height: 30px;
+    padding: 5px 15px;
+    color: white;
+    border: none;
+}
+
+button a {
+    text-decoration: none;
+    color: white;
+}
+
+input, textarea, select {
+    margin: 5px;
+    padding: 5px;
+    height: 30px;
+    width: 200px;
+    color:black;
+    border: 2px solid lightgray;
+    border-radius: 5px;
+}
+
+:is(input, textarea, select):focus-visible {
+    border: 3px solid purple;
+}
+
+textarea {
+    resize: vertical;
+    font-family: Arial, sans-serif;;
+}
+
+label {
+    width: 200px;
+}
+
+button:hover {
+    background-color: #b31bb3;
+}
+
+form {
+    margin: 10px;
+}
+
+/* event-section container and its children */
+.main-container {
+    display: grid;
+    grid-template-columns: 20% 55% 25%;
+    align-items: start;
+    justify-content: center;
+    justify-items: stretch;
+    /* display: flex;
+    flex-flow: row nowrap; */
+}
+
+.main-container > div {
+    margin: 5px;
+}
+
+#events {
+    align-items: flex-start;
+    display: flex;
+    flex-flow: column wrap;
+    overflow: hidden;
+    justify-content: center;
+}
+
+
+.user-info, .more-info {
+    /* width: 200px; */
+    position: sticky;
+    background-color: gainsboro;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* .more-info {
+    width: 250px;
+    position: sticky;
+} */
+
+.event-link {
+    margin: 5px;
+    display: block;
+}
+
+/* div cards within the event-section */
+#events > div {
+    border-radius: 10px;
+    background-color: gainsboro;
+    /* max-width: 55%; */
+    margin: 5px;
+    padding: 5px;
+    display: flex;
+    flex-flow: row wrap;
+    flex: 1 1 auto;
+    align-content: space-between;
+}
+
+#events > div:nth-child(1) {
+    margin-top: 0px;
+}
+
+#events > div:hover {
+    z-index: 1;
+    align-self: flex-start;
+    height: auto;
+    min-height: 110px;
+}
+
+/* each part of a event box */
+#events > div > * {
+    margin: 7px;
+    width: 100%
+}
+
+:where(.volunteers, .participants) > * {
+    margin: 7px;
+}
+
+/* The div containing the edit and delete card buttons */
+.card-actions {
+    display: hidden;
+    width: 100%;
+    justify-items: center;
+    justify-content: center;
+    align-items: right;
+    text-align: right;
+    height: auto;
+    justify-content: space-between;
+}
+
+#events div:hover .card-actions {
+    display: inline;
+}
+
+.delete, .edit {
+    display: inline-block;
+    width:25%;
+}
+
+table {
+    border-spacing: 0px;
+}
+
+td, th {
+    border: 1.5px solid black;
+    padding: 5px;
+}
+
+th {
+    background-color: black;
+    color: white;
+    font-weight: normal;
+}
+
+*:disabled {
+    text-decoration: line-through;
+    background-color: crimson;
+}

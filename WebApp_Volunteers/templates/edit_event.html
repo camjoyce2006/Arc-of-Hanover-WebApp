@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   <h1>{% block title %}Edit Event '{{ event.event_name }}' {% endblock %}</h1>
+   <form method="POST" action=" {{ url_for('edit_event', event_id=event.id) }}">
+      <label for="event-name">Event Name</label>
+      <input type="text" name="event-name" placeholder="Event Name" value="{{ event.event_name }}">
+      <label for="date">Date</label>
+      <input type="date" name="date" value="{{ event.date }}">
+      <br>
+      <label for="oragnizer">Event Organizer</label>
+      <input type="text" name="oragnizer" placeholder="Who is organizing the event?" value="{{ organizer.fullname }}">
+      <label for="event-type">Event Type</label>
+      <select name="event-type">
+            <option value="{{ event.type }}" selected>{{ event.type.capitalize() }}</option>
+            {% if event.type == 'participate' %}
+                  <option value="volunteer">Volunteer-only</option>
+                  <option value="volunteer-participate">Volunteer or Participate</option>
+            {% elif event.type == 'volunteer-participate' %}
+                  <option value="participate">Participate-only</option>
+                  <option value="volunteer">Volunteer-only</option>
+            {% else %}
+            <option value="participate">Participate-only</option>
+            <option value="volunteer or Participate">Volunteer-only</option>
+            {% endif %}
+      </select>
+      <br>
+      <label for="desc">Event Description</label>
+      <textarea type="text" name="desc" placeholder="Description">{{ event.description }}</textarea>
+      <button type="submit">Confirm Edits</button>
+  </form>
+   </form>
+{% endblock %}

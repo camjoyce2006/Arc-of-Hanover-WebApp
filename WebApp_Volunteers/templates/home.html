@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <span class="title"><h1>{% block title %} Home {% endblock %}</h1></span>
+    <div id="events">
+        <h1>Welcome, {{ user.fullname }}</h1>
+        {% for event in events %}
+            {% if event.organizer_id == user_id %}
+                <div class="event">
+                    <h3>{{ event.event_name }}</h4>
+                    <p>Date: {{ event.date.strftime("%x") }}</p>
+                    <p>Organizer: {{ user.fullname }} (You)</p>
+                    <p>Description <br> {{ event.description }}</p>
+                    {% if event.type[:9] == "volunteer" %}
+                        <div class="volunteers">Volunteers:
+                            <button><a href="{{ url_for('volunteer', event_id=event.id) }}"> Sign up to Volunteer</a></button>
+                            <br>
+                            <table class="volunteer-table">
+                                <thead>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                </thead>
+                                {% for volunteer in event.volunteers %}
+                                    <tr>
+                                        <td>{{ users.query.get_or_404(volunteer.user_id).fullname }}</td>
+                                        <td>{{ volunteer.type }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+                    <div class="card-actions">
+                        <form class="delete" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
+                            <button id="d-s" type="submit">Delete</button>
+                        </form>
+                        <button class="edit"><a href="{{ url_for('edit_event', event_id=event.id) }}">Edit Event</a></button>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

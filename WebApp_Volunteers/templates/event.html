@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <span class="title"><h1>{% block title %} {{ event.event_name }} {% endblock %}</h1></span>
+        <div class="event-view">
+            <p>Date: {{ event.date }}</p>
+            {% if user_id == event.organizer_id %}
+                <p>Organizer: {{ user.fullname }} (You)</p>
+            {% else %}    
+                <p>Organizer: {{ users.query.get_or_404(event.organizer_id).fullname }}</p>
+            {% endif %}
+            <p>Description <br> {{ event.description }}</p>
+            {% if event.type[:9] == "volunteer" %}
+                <div class="volunteers">Volunteers: ({{ event.volunteers|length }})
+                    <button><a href="{{ url_for('volunteer', event_id=event.id) }}"> Sign up to Volunteer</a></button>
+                    <br>
+                    <table class="volunteer-table">
+                        <thead>
+                            <th>Name</th>
+                            <th>Type</th>
+                        </thead>
+                        {% for volunteer in event.volunteers %}
+                            <tr>
+                                <td>{{ users.query.get_or_404(volunteer.user_id).fullname }}</td>
+                                <td>{{ volunteer.type }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% if event.organizer_id == user_id %}
+                    <form class="delete" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
+                        <button id="d-s" type="submit">Delete</button>
+                    </form>
+                    <button class="edit"><a href="{{ url_for('edit_event', event_id=event.id) }}">Edit Event</a></button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
