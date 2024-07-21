@@ -1,0 +1,14 @@
+*.env
+*.log
+
+tes.py
+pseudocode.py
+
+**/.vscode
+data-save-7.9.2024.json
+details.json
+
+react/
+templates/error_404.html
+templates/dumps.html
+templates/about.html
