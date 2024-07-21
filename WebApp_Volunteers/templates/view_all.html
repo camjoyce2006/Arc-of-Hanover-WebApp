@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <span class="title"><h1>{% block title %} View Table {% endblock %}</h1></span>
+    <form action="{{ url_for('view_all') }}" method="POST">
+        <div class="form-group">
+            <label for="tablename">Select Table</label>
+            <div class="form-field">
+                <select name="tablename">
+                    <option value="user">Users</option>
+                    <option value="event">Events</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit">Load Table</button>
+        </div>
+    </form>
+    <div class="div-table">
+        {% if model %}
+            {% set cols = model.__table__.columns.keys() %}
+            <h1>{{ model.__tablename__|title }}</h1>
+            <p># of {{ model.__tablename__}}s: {{ model.query.count() }}</p>
+            <table>
+                <thead>
+                    {%- for colkey in cols %}
+                        <th>{{ colkey }}</th>
+                    {% endfor -%}
+                </thead>
+                <tbody>
+                    {%- for row in model.query.order_by(model.id.desc()).all() %}
+                        <tr>
+                            {%- for col in cols %}
+                                {% set attr = row.__getattribute__(col) %}
+                                {% if col == 'created_at' %}
+                                    {% set attr = attr.strftime("%m/%d/%Y %H:%M:%S") %}
+                                {% elif col == 'date' %}
+                                    {% set attr = attr.strftime("%#m/%#d/%Y") %}
+                                {% endif %}
+                                    <td>{{ attr }}</td>
+                            {% endfor -%}
+                        </tr>
+                    {% endfor -%}
+                </tbody>
+            </table>
+        {% else %}
+            <h3>No table selected</h3>
+        {% endif %}
+</div>
+{% endblock %}

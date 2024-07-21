@@ -1,338 +1,326 @@
-# app.py for Bible Verses website
-from fileinput import filename
-import os, io, psycopg2, random
-from sqlalchemy import LargeBinary, select
-from flask import Flask, render_template, request, url_for, redirect, send_file, flash
-from flask_sqlalchemy import SQLAlchemy
-from markupsafe import escape
 
-from sqlalchemy.sql import func
+from flask import session
+from flask import render_template
+from flask import request
+from flask import url_for
+from flask import redirect
+from flask import flash
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] =\
-        'postgresql://'+\
-            os.environ['DB_UN']+':'+\
-            os.environ['DB_PW']+\
-            '@localhost:5432/'+\
-            os.environ['DB']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = '23ed506a97fd81899aa1a73a5354095972a6927ff50908e8'
+from datetime import date as dt
 
+import random
 
-print (f"Connected to database at URI '{app.config['SQLALCHEMY_DATABASE_URI']}'")
+from config import DEV_PORT
+import helpers
 
-"""
-$Env:DB = 'arc-volunteer-info'
-$Env:DB_UN = 'Cam'
-$Env:DB_PW = '12user345'; echo oooo
-"""
+from forms import SignUpForm
+from forms import AdminSignUpForm
+from forms import LoginForm
+from forms import EditUserForm
+from forms import EditUserAdminForm
+from forms import CreateEventForm
+from forms import EditEventForm
 
-# Create a Flask app
-db = SQLAlchemy(app)
-
-print('Setting app context...')
-app_context = app.app_context()
-app_context.push()
-# db.drop_all()
-# print('Dropped all tables')
-
-# A table where all registered Users' information is stored
-class User(db.Model):
-    """Stores registered users' information
-    :attr fname: First name
-    :attr lname: Last name
-    :attr lname: Full name (First + Last)
-    :attr username: 5-digit login code
-    :attr is_logged_in: Whether a user is currently logged in
-    :attr role: A user's role (Admin/Organizer/Default)
-    :attr events_organized: All events organized by a user
-    :attr events_attended: All events attended by a user
-    :attr events_organized: All events at which a user volunteered
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    fname = db.Column(db.Text, nullable=False)
-    lname = db.Column(db.Text, nullable=False)
-    fullname = db.Column(db.Text, nullable=False)
-    username = db.Column(db.Integer, nullable=False)
-    is_logged_in = db.Column(db.Boolean, nullable=False, default=False)
-    role = db.Column(db.Text, nullable=False, default='Orgnaizer')
-    events_organized = db.relationship('Event', backref='user')
-    events_attended = db.relationship('Participant', backref='user')
-    events_volunteered = db.relationship('Volunteer', backref='user')
-
-    def __repr__(self):
-        return f'<User "{self.fullname}">'
-
-# A table where all Events are stored
-class Event(db.Model):
-    """Stores information about events
-    :attr type: The type of event (Volunteer-only/Participate-only/Volunteer or participate)
-    :attr event_name: The name of the event
-    :attr date: The date on which the event is taking place
-    :attr description: optional field describing the event
-    :attr volunteers: The list of volunteers at an event
-    :attr attendees: The list of attendees of an event
-    :attr organizer_id: References the id of the event organizer, whose information is stored in the `User` table
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Text, nullable=False)
-    event_name = db.Column(db.Text, nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    description = db.Column(db.Text)
-    volunteers = db.relationship('Volunteer', backref='event')
-    attendees = db.relationship('Participant', backref='event')
-    organizer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __repr__(self):
-        return f'<Event "{self.event_name[:20]}...">'
-
-# A table where all Volunteers are stored
-class Volunteer(db.Model):
-    """Stores the list of all event volunteers
-    :attr type: The type of event being volunteered at (Thrift Store/Community Event)
-    :attr event_id: The id of the event at which the user volunteered
-    :attr user_id: the id of the user who volunteered
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Text, nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __repr__(self):
-        return f'<Volunteer {self.user_id} volunteered at Event {self.event_id}">'
-     
-# A table where all event event Participants are stored
-class Participant(db.Model):
-    """Stores the list of all event attendees
-    :attr event_id: The id of the event that the user attended
-    :attr user_id: the id of the user who attended the event
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    
-    def __repr__(self):
-        return f'<Participant {self.user_id}.fname participated at Event {self.event_id}.">'
+from datastructure import app, db
+from datastructure import User
+from datastructure import Event 
+from datastructure import Volunteer 
+from datastructure import Participant
 
 # Global variables to track whether a user is logged in
-# If a uer is logged in, their user ID is stored
-global isLoggedIn, userID
-isLoggedIn = False
-"""Whether the user is logged in.
-    :`True` if a the user is logged in
-    :`False` if the user is logged out
-"""
-userID = 8
-"""The id of the currently logged in user
-    :If the user is logged out, `userID` is `None`
-"""
-# db.create_all()
-# print('Successfully created tables')
+# If a user is logged in, their user ID is stored
+global today
+today = dt.today()
+"""Today's date"""
 
-# user1 = User(id=1, fname='Cameron', lname='Joyce', fullname='Cameron Joyce', username=77121)
-# user2 = User(id=2, fname='Taixi', lname='Wang', fullname='Taixi Wang', username=12345)
-# user3 = User(id=3, fname='Justin', lname='Biester', fullname='Justin Biester', username=56789)
-# db.session.add_all([user2])
-# db.session.commit()
-# print('Successfully added users to database')
+@app.before_request
+def log_request(toPrint=True):
+    # if not session.get('initialization_done'):
+    #     print('Initializing app...')
+    #     session_info = helpers.update_session('first', 8)
+        
+    not_run = ['static', 'volunteer', 'unvolunteer', 'attend', 'unattend']
+    if request.endpoint not in not_run:
+        helpers.update_session('page', session.get('user_id'), request.endpoint)
+        session_info = helpers.get_session_info()
+        if toPrint:
+            for key, value in session_info.items():
+                print(f'{key}: {value}')
 
-# event1 = Event(type='volunteer-only', event_name='Arc Thrift Store Volunteering', date='2024-06-20', organizer_id=1)
-# event2 = Event(type='particiapte-only', event_name='Art Auction', date='2024-06-15', organizer_id=2)
-# event3 = Event(type='volunteer-participate', event_name='River City Inclusive Gym', date='2024-06-09', organizer_id=3)
-# db.session.add_all([event1, event2, event3])
-# print('Successfully added events to database')
+    message = f"User \'{session.get('username')}\' "
+    messages = {
+        "index": "went home.",
+        "home": "viewed their home dashboard.",
+        "create": {
+                "GET": "began creating an event.",
+                "POST": "created an event."
+            },
+        "edit_event": {
+                "GET": f"began editing an event.",
+                "POST": "confirmed edits to an event."
+            },
+        "delete_event": "deleted an event.",
+        "event": "viewed an event page.",
+        "signup": {
+                "GET": "began account creation.",
+                "POST": "is new to AVA. Welcome!"
+            },
+        "login": {
+                "GET": "wants to log in.",
+                "POST": "successfully logged in."
+            },
+        "signout": "logged off.",
+        "volunteer": "signed up to volunteer at an event.",
+        "unvolunteer": "is no longer volunteering at an event.",
+        "attend": "RSVP'ed to attend an event.",
+        "unattend": "un- RSVP'ed to attend an event.",
+    }
 
-# db.session.commit()
-# print('Successfully committed to session')
+    if session.get('user_id') and request.endpoint != 'static':
+        if request.endpoint in messages.keys():
+            if type(messages[request.endpoint]) is dict:
+                message += messages[request.endpoint][request.method]
+            else:
+                message += messages[request.endpoint]
+        elif request.endpoint not in not_run:
+            message += f"accessed endpoint \'{request.endpoint}\'"
+        else:
+            message += "took an unloggable action."
+        
+        helpers.logEvents('all', 'i', message)
 
-# def queryDB(type, entity, ident, desc):
-#     if type == "one":
-#        result = db.one_or_404(entity=entity, ident=ident, description=desc)
-#     elif type == "get":
-#        result = db.get_or_404(entity=entity, ident=ident, description=desc)
-#     elif type == "select":
-#         result = db.session.execute(select(entity).where(entity.id == ident))
-#     return result
+def render_page(template, status=None, **context):
+    if not status:
+        status = session.get('is_logged_in')
+    if 'event_id' not in context:
+        context.update({'event_id': None})
+    return render_template(template,
+                           users=User, 
+                           v=Volunteer, 
+                           p=Participant, 
+                           ev=Event, 
+                           status=status, 
+                           user_id=session.get('user_id'),
+                           user=helpers.get_session_info('user'),
+                           prev_page=session.get('previous_page'),
+                           today=today,
+                           **context)
 
-# def addItem(item):
-#     db.session.add(item)
-#     db.session.commit()
-
-# def updateItem(entity, id):
-#     return
-
-# events = Event.query.all() #db.session.execute(select(Event)).fetchall()
-# for event in events:
-#     print(f"Event name: {event.event_name}")
-#     print(f"Event date: {event.date}")
-#     print(f"# of Volunteers: {len(event.volunteers)}")
-#     event.description = "test success"
-#     db.session.commit()
-# print(User.query.get_or_404(2).fullname)
+def redirect_current(**values):
+    return redirect(url_for(session.get('current_page'), **values))
 
 # Home page that displays all the events
 @app.route('/')
+def landing():
+    return redirect(url_for('index'))
+
+@app.route('/dashboard')
 def index():
-    print(isLoggedIn, userID)
-    events = Event.query.all()
-    print(1)
-    user = User.query.get_or_404(userID)
-    print(user.id)
-    return render_template('index.html', events=events, users=User, user=user, status=isLoggedIn, user_id=userID)
+    all_events = Event.query.order_by(Event.date.desc()).all()
+    events = [event for event in all_events if event.date >= today]
+    return render_page('index.html',
+                       events=events,
+                       all_events=all_events)
 
 # The user's home page where they can find all the events they have created
-@app.route('/home/<int:user_id>')
-def home(user_id):
+@app.route('/user-dashboard/')
+def home():
     events = Event.query.all()
-    user = User.query.get_or_404(user_id)
-    return render_template('home.html', users=User, events=events, volunteers= Volunteer, events2=Event, user=user, status=isLoggedIn, user_id=userID)
+    return render_page('home.html', events=events)
 
 # Allows users to sign up for an account
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if session.get('is_logged_in') and helpers.get_session_info('user').role.code == 'admin':
+        form = AdminSignUpForm()
+    else:
+        form = SignUpForm()
     if request.method == 'POST':
         fname = request.form['fname']
         lname = request.form['lname']
         fullname=f"{fname} {lname}"
 
+        userkeys = [user.username for user in User.query.all()]
         username = random.randint(10000, 99999)
-
-        # Creates a new user and adds it to the User table
-        new_user = User(fname=fname,
-                        lname=lname,
-                        fullname=fullname,
-                        username=username,
-                        role="Organizer")
+        while username in userkeys:
+            username = random.randint(10000, 99999)
         
-        db.session.add(new_user)
+        helpers.update_db(User, User(), request.form, add=True,
+                          fullname=fullname, username=username)
 
         # Redirects the user to the login page
-        return redirect(url_for('login', welcome_message=f'Congratulations, {fname}! Your username is {username}.'))
+        return redirect(url_for('login', 
+                                welcome_message=f'Congratulations, {fname}! Your username is {username}.'))
     
-    return render_template('signup.html', user_id=userID)
+    return render_page('form_default.html', status=False, form=form)
 
 # Allows registered users to log in to their account
 @app.route('/login', methods=['GET', 'POST'])
-def login():    
-    print('loaded login page')
+def login():
+    form = LoginForm()    
     if request.method == 'POST':
         uname = request.form['uname']
-        
-        # Checks that a username was entered
-        if uname == '':
-            flash('Enter your username to login')
-        
+
         # User authentication checks
-        users = User.query.all()
-        for user in users:  
-            print(f"{user.fullname}\nLogged In? {user.is_logged_in} {user.username}") 
-            if user.username == int(uname):
-            # Checks if username and password match in the database, doesn't check user 0 because there is no User 0
-                global isLoggedIn, userID
-                isLoggedIn = True
-                userID = user.id
-                user.is_logged_in = True
-                db.session.commit()       
-                print(f"User '{user.fullname}' Successfully logged into their account")
-                return redirect(url_for('index'))
+        user = User.query.filter_by(username=int(uname)).first()
+        if user:   
+            print(f"User '{user.fullname}' Successfully logged into their account")
+            helpers.update_session('login', user.id)
+            return redirect(url_for('index'))
+        else:
             # Notifies unregistered users to sign up for an account
-            else:
-                flash(f'No user with username \'{uname}\' is in our records. Please sign up for an account below.')
+            flash(f'That username is not registered in our records. Please sign up for an account below.')
     
-    return render_template('login.html', user_id=userID, status=False)
+    return render_page('form_default.html', 
+                       status=False, 
+                       form=form)
 
 # Allows a user to sign out, resets the global variables
 @app.route('/signout', methods=['GET', 'POST'])
 def signout():
-    global isLoggedIn, userID
-    isLoggedIn = False
-    userID = 8
-    if request.method == 'POST':
-        user = User.query.get_or_404(userID)
-        user.is_logged_in = False
-        db.session.commit()
+    helpers.update_session(action='signout', user_id=8)
     return redirect(url_for('index'))
+
+@app.route('/edituser', methods=['GET', 'POST'])
+def edit_user():
+    user = helpers.get_session_info('user')
+    print(user)
+    if user.role.code == 'admin':
+        form = EditUserAdminForm()
+    else: 
+        form = EditUserForm()
+    form(user)
+    if request.method == 'POST':
+
+        helpers.update_db(User, user, request.form)
+
+    return render_page('form_default.html', form=form)
+
+@app.route('/deluser')
+def delete_user():
+    user = helpers.get_session_info('user')
+    for v in user.events_volunteered:
+        db.session.delete(v)
+
+    for p in user.events_attended:
+        db.session.delete(p)
+
+    for e in user.events_organized:
+        db.session.delete(e)
+
+    db.session.delete(user)
+    db.sesion.commit()
 
 # Allows a user to view the details of an event
 @app.route('/event/<int:event_id>')
 def event(event_id):
-    user = User.query.get_or_404(userID)
-    event = Event.query.get_or_404(event_id)
-    return render_template('event.html', users=User, event=event, user=user, user_id=userID)
+    event = Event.query.filter_by(id=event_id).first()
+    return render_page('event.html', event=event)
 
 # Allows a user to save new events
-@app.route('/create/<int:user_id>', methods=['GET', 'POST'])
-def create(user_id):
+@app.route('/create/', methods=['GET', 'POST'])
+def create():
+    form = CreateEventForm()
+    form(session.get('username'))
     if request.method == 'POST':
-        event_name = request.form['event-name']
-        date = request.form['date']
-        type = request.form['event-type']
-        desc = request.form['desc']
+        organizer_id = User.query.filter_by(fullname=request.form['organizer_name']).first().id
 
-        # Creates a new event and adds it to the Event table
-        event = Event(event_name=event_name,
-                    date=date,
-                    type=type,
-                    description=desc,
-                    organizer_id=user_id)
+        helpers.update_db(Event, Event(), request.form, add=True, organizer_id=organizer_id)
 
-        db.session.add(event)
-
-        #Redirects the user to the home page
-        return redirect(url_for('index'))
-    return render_template('create_event.html', user_id=user_id)
+        #Redirects the user to the previous page
+        return redirect(url_for(session.get('previous_page')))
+    return render_page('form_default.html', form=form)
 
 # Allows users to edit events they have created
 @app.route('/edit/<int:event_id>', methods=['GET', 'POST'])
 def edit_event(event_id):
-    event = Event.query.get_or_404(event_id)
-    organizer = User.query.get_or_404(event.organizer_id)
-    if request.method == 'POST':   
-        event_name = request.form['event-name']
-        date = request.form['date']
-        type = request.form['event-type']
-        desc = request.form['desc']
+    event = Event.query.filter_by(id=event_id).first()
+    organizer = User.query.filter_by(id=event.organizer_id).first()
+    form = EditEventForm()
+    form(event)
+    if request.method == 'POST':
+        organizer_id = User.query.filter_by(fullname=request.form['organizer_name']).first().id
 
-        # Updates necessary fields in table entry
-        event.type = type
-        event.event_name = event_name
-        event.date = date
-        event.description = desc
-        
-        db.session.add(event)
-        db.session.commit()
-
+        helpers.update_db(Event, event, request.form, organizer_id=organizer_id)
+            
         #Redirects the user to the home page
-        return redirect(url_for('index'))
-    return render_template('edit_event.html', event=event, organizer=organizer, user_id=userID)
+        return redirect(url_for(session.get('previous_page'), event_id=event_id))
+    return render_page('form_default.html',
+                           form=form,
+                           event=event,
+                           organizer=organizer,
+                           event_id=event_id)
 
 # Allows users to delete events they have created
-@app.post('/delete/<int:event_id>')
+@app.route('/delete_event/<int:event_id>', methods=['GET', 'POST'])
 def delete_event(event_id):
     event = Event.query.get_or_404(event_id)
     db.session.delete(event)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for(session.get('previous_page'), event_id=event_id))
 
 # Allows users to sign up to volunteer 
 @app.route('/volunteer/<int:event_id>')
 def volunteer(event_id):
-    if isLoggedIn == True:
-        volunteer = Volunteer(type='Thrift Store', event_id=event_id, user_id=userID)
+    if session.get('is_logged_in') == True:
+        event = Event.query.filter_by(id=event_id).first()
+        volunteer = Volunteer(type=event.volunteer_type, event_id=event_id, user_id=session.get('user_id'))
 
         db.session.add(volunteer)
         db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for(session.get('current_page'), event_id=event_id))
+
+@app.route('/unvolunteer/<int:event_id>', methods=['GET', 'POST'])
+def unvolunteer(event_id):
+    vol = Volunteer.query.get_or_404(event_id)
+    db.session.delete(vol)
+    db.session.commit()
+    return redirect(url_for(session.get('current_page'), event_id=event_id))
 
 # Allows users to RSVP up to attend an event 
 @app.route('/attend/<int:event_id>')
 def attend(event_id):
-    if isLoggedIn == True:
-        participant = Participant(event_id=event_id, user_id=userID)
+    if session.get('is_logged_in') == True:
+        participant = Participant(event_id=event_id, 
+                                  user_id=session.get('user_id'))
 
         db.session.add(participant)
         db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for(session.get('current_page'), event_id=event_id))
+
+@app.route('/unattend/<int:event_id>', methods=['GET', 'POST'])
+def unattend(event_id):
+    attendee = Participant.query.get_or_404(event_id)
+    db.session.delete(attendee)
+    db.session.commit()
+    return redirect(url_for(session.get('current_page'), event_id=event_id))
+
+@app.route('/viewtable', methods=['GET', 'POST'])
+def view_all():
+    if request.method == 'POST':
+        print('Post')
+        tablename = request.form['tablename']
+
+        return redirect(url_for('view_table', tablename=tablename))
+    return render_page('view_all.html', model=None)
+
+
+@app.route('/viewtable/<tablename>')
+def view_table(tablename):
+    if tablename == 'event':
+        model = Event
+    if tablename == 'user':
+        model = User
+
+    return render_page('view_all.html', model=model)
+        
+@app.errorhandler(404)
+def error_404(e):
+    return render_template('error_404.html', 
+                           user=helpers.get_session_info('user'), 
+                           status=session.get('is_logged_in'), 
+                           user_id=session.get('user_id'))
+
 # Run the app
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, port=DEV_PORT)

@@ -1,0 +1,335 @@
+{
+    "participant": {
+        "tablename": "participant",
+        "row_count": 2,
+        "col_keys": [
+            "id",
+            "event id",
+            "user id"
+        ],
+        "rows": {
+            "1": {
+                "id": 1,
+                "event_id": 3,
+                "user_id": 1
+            },
+            "2": {
+                "id": 2,
+                "event_id": 6,
+                "user_id": 1
+            }
+        }
+    },
+    "volunteer": {
+        "tablename": "volunteer",
+        "row_count": 4,
+        "col_keys": [
+            "id",
+            "type",
+            "event id",
+            "user id",
+            "time in",
+            "time out"
+        ],
+        "rows": {
+            "2": {
+                "id": 2,
+                "type": "thrift",
+                "event_id": 4,
+                "user_id": 1,
+                "time_in": null,
+                "time_out": null
+            },
+            "3": {
+                "id": 3,
+                "type": "thrift",
+                "event_id": 4,
+                "user_id": 234,
+                "time_in": null,
+                "time_out": null
+            },
+            "5": {
+                "id": 5,
+                "type": "none",
+                "event_id": 3,
+                "user_id": 1,
+                "time_in": null,
+                "time_out": null
+            },
+            "6": {
+                "id": 6,
+                "type": "community",
+                "event_id": 6,
+                "user_id": 1,
+                "time_in": null,
+                "time_out": null
+            }
+        }
+    },
+    "user": {
+        "tablename": "user",
+        "row_count": 9,
+        "col_keys": [
+            "id",
+            "created at",
+            "fname",
+            "lname",
+            "fullname",
+            "gender",
+            "username",
+            "email",
+            "address",
+            "is idd",
+            "has bkg check",
+            "open to check",
+            "has volunteer form",
+            "is logged in",
+            "role"
+        ],
+        "rows": {
+            "1": {
+                "id": 1,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Cameron",
+                "lname": "Joyce",
+                "fullname": "Cameron Joyce",
+                "gender": "male",
+                "username": 77121,
+                "email": "cejoyce3@gmail.com",
+                "address": "10416 Park Tree Place Glen Allen, VA 23060",
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": true,
+                "has_volunteer_form": true,
+                "is_logged_in": true,
+                "role": "organizer"
+            },
+            "2": {
+                "id": 2,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Taixi",
+                "lname": "Wang",
+                "fullname": "Taixi Wang",
+                "gender": "nosay",
+                "username": 12345,
+                "email": null,
+                "address": null,
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": false,
+                "role": "organizer"
+            },
+            "3": {
+                "id": 3,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Marty",
+                "lname": "Wilson",
+                "fullname": "Marty Wilson",
+                "gender": "nosay",
+                "username": 56789,
+                "email": null,
+                "address": null,
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": false,
+                "role": "admin"
+            },
+            "4": {
+                "id": 4,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Sherri",
+                "lname": "Lanning",
+                "fullname": "Sherri Lanning",
+                "gender": "nosay",
+                "username": 34567,
+                "email": null,
+                "address": null,
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": false,
+                "role": "store-manager"
+            },
+            "5": {
+                "id": 5,
+                "created_at": "7/18/2024 14:32:23",
+                "fname": "Ugh",
+                "lname": "Jes",
+                "fullname": "Ugh Jes",
+                "gender": "non-binary",
+                "username": 23812,
+                "email": "nb@te3.com",
+                "address": "Serbia",
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": true,
+                "role": "default"
+            },
+            "6": {
+                "id": 6,
+                "created_at": "7/18/2024 14:39:14",
+                "fname": "r",
+                "lname": "k",
+                "fullname": "r k",
+                "gender": "female",
+                "username": 60626,
+                "email": "random@de",
+                "address": "dsfs",
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": false,
+                "role": "default"
+            },
+            "8": {
+                "id": 8,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Default",
+                "lname": "User",
+                "fullname": "Default User",
+                "gender": "nosay",
+                "username": 70964,
+                "email": null,
+                "address": null,
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": false,
+                "role": "default"
+            },
+            "9": {
+                "id": 9,
+                "created_at": "7/17/2024 19:29:24",
+                "fname": "Admin",
+                "lname": "Account",
+                "fullname": "Admin Account",
+                "gender": "nosay",
+                "username": 58354,
+                "email": null,
+                "address": null,
+                "is_idd": false,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": false,
+                "is_logged_in": true,
+                "role": "admin"
+            },
+            "234": {
+                "id": 234,
+                "created_at": "7/18/2024 14:24:26",
+                "fname": "Bah",
+                "lname": "Humbug",
+                "fullname": "Bah Humbug",
+                "gender": "male",
+                "username": 93819,
+                "email": "scrooge@xmas.org",
+                "address": "North Pole",
+                "is_idd": true,
+                "has_bkg_check": false,
+                "open_to_check": false,
+                "has_volunteer_form": true,
+                "is_logged_in": true,
+                "role": "default"
+            }
+        }
+    },
+    "event": {
+        "tablename": "event",
+        "row_count": 6,
+        "col_keys": [
+            "id",
+            "created at",
+            "event type",
+            "volunteer type",
+            "event name",
+            "date",
+            "description",
+            "location",
+            "organizer id",
+            "organizer name"
+        ],
+        "rows": {
+            "1": {
+                "id": 1,
+                "created_at": "7/17/2024 19:29:24",
+                "event_type": "volunteer-only",
+                "volunteer_type": "thrift",
+                "event_name": "Arc Thrift Store Volunteering",
+                "date": "6/20/2024",
+                "description": "",
+                "location": "10193 Washington Highway Glen Allen, VA 23059",
+                "organizer_id": 1,
+                "organizer_name": "Cameron Joyce"
+            },
+            "2": {
+                "id": 2,
+                "created_at": "7/17/2024 19:29:24",
+                "event_type": "participate-only",
+                "volunteer_type": "community",
+                "event_name": "Art Auction",
+                "date": "6/15/2024",
+                "description": null,
+                "location": null,
+                "organizer_id": 2,
+                "organizer_name": null
+            },
+            "3": {
+                "id": 3,
+                "created_at": "7/17/2024 19:29:24",
+                "event_type": "volunteer-participate",
+                "volunteer_type": "none",
+                "event_name": "River City Inclusive Gym",
+                "date": "6/9/2024",
+                "description": null,
+                "location": null,
+                "organizer_id": 3,
+                "organizer_name": null
+            },
+            "4": {
+                "id": 4,
+                "created_at": "7/17/2024 19:29:24",
+                "event_type": "volunteer-only",
+                "volunteer_type": "thrift",
+                "event_name": "Volunteering",
+                "date": "7/20/2024",
+                "description": "Help out!",
+                "location": "10193 Washington Highway Glen Allen, VA 23059",
+                "organizer_id": 1,
+                "organizer_name": "Cameron Joyce"
+            },
+            "5": {
+                "id": 5,
+                "created_at": "7/18/2024 16:46:20",
+                "event_type": "volunteer-only",
+                "volunteer_type": "community",
+                "event_name": "ahaha",
+                "date": "10/8/0024",
+                "description": "test",
+                "location": "none",
+                "organizer_id": 1,
+                "organizer_name": "Cameron Joyce"
+            },
+            "6": {
+                "id": 6,
+                "created_at": "7/18/2024 16:47:33",
+                "event_type": "volunteer-participate",
+                "volunteer_type": "community",
+                "event_name": "ahaha",
+                "date": "10/8/2024",
+                "description": "lmao",
+                "location": "none",
+                "organizer_id": 1,
+                "organizer_name": "Cameron Joyce"
+            }
+        }
+    }
+}

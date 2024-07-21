@@ -1,40 +1,71 @@
 {% extends 'base.html' %}
-
+{% from 'macros.html' import event_action_button, event_top_desc %}
 {% block content %}
     <span class="title"><h1>{% block title %} {{ event.event_name }} {% endblock %}</h1></span>
-        <div class="event-view">
-            <p>Date: {{ event.date }}</p>
-            {% if user_id == event.organizer_id %}
-                <p>Organizer: {{ user.fullname }} (You)</p>
-            {% else %}    
-                <p>Organizer: {{ users.query.get_or_404(event.organizer_id).fullname }}</p>
-            {% endif %}
-            <p>Description <br> {{ event.description }}</p>
-            {% if event.type[:9] == "volunteer" %}
+    <div class="event-single">
+        <div class="event-card">
+            {{ event_top_desc(event, user_id) }}
+            
+            {% if "volunteer" in event.event_type.code %}
                 <div class="volunteers">Volunteers: ({{ event.volunteers|length }})
-                    <button><a href="{{ url_for('volunteer', event_id=event.id) }}"> Sign up to Volunteer</a></button>
+                    {% for v in event.volunteers if v.user_id == user_id %}      
+                        {{ event_action_button('unvolunteer', v.id, 'Unvolunteer') }}
+                    {% else %}
+                        {{ event_action_button('volunteer', event.id, 'Sign up to Volunteer') }}  
+                    {% endfor %}
                     <br>
                     <table class="volunteer-table">
                         <thead>
                             <th>Name</th>
-                            <th>Type</th>
+                            {% if user.role.code != 'default' %}
+                                <th>Email</th>
+                                <th>Has Background Check</th>
+                                <th>Open to Background Check</th>
+                                <th>Completed Volunteer Application</th>
+                            {% endif %}
                         </thead>
                         {% for volunteer in event.volunteers %}
                             <tr>
-                                <td>{{ users.query.get_or_404(volunteer.user_id).fullname }}</td>
-                                <td>{{ volunteer.type }}</td>
+                                <td>{{ users.query.filter_by(id=volunteer.user_id).first().fullname }}</td>
+                                {% if user.role.code != 'default' %}
+                                    <td>{{ users.query.filter_by(id=volunteer.user_id).first().email }}</td>
+                                    <td>{{ users.query.filter_by(id=volunteer.user_id).first().has_bkg_check }}</td>
+                                    <td>{{ users.query.filter_by(id=volunteer.user_id).first().open_to_check }}</td>
+                                    <td>{{ users.query.filter_by(id=volunteer.user_id).first().has_volunteer_form }}</td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
-                {% if event.organizer_id == user_id %}
-                    <form class="delete" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
-                        <button id="d-s" type="submit">Delete</button>
-                    </form>
-                    <button class="edit"><a href="{{ url_for('edit_event', event_id=event.id) }}">Edit Event</a></button>
-                {% endif %}
-            </div>
+            {% endif %}
+            {% if "participate" in event.event_type.code %}
+                <div class="participants">Participants: ({{ event.attendees|length }})
+                    {% for p in event.attendees if p.user_id == user_id %}      
+                        {{ event_action_button('unattend', p.id, 'Un-RSVP') }}
+                    {% else %}
+                        {{ event_action_button('attend', event.id, 'RSVP to Attend') }}
+                    {% endfor %}
+                    <br>
+                    <table class="volunteer-table">
+                        <thead>
+                            <th>Name</th>
+                            <th>Email</th>
+                        {% for participant in event.attendees %}
+                            <tr>
+                                <td>{{ users.query.filter_by(id=participant.user_id).first().fullname }}</td>
+                                <td>{{ users.query.filter_by(id=participant.user_id).first().email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endif %}
+            {% if event.organizer_id == user_id or user.role.code == "admin" %}
+                <div class="card-actions">
+                    {{ event_action_button('delete_event', event.id, 'Delete') }}
+                    {{ event_action_button('edit_event', event.id, 'Edit')}}
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
+
 {% endblock %}

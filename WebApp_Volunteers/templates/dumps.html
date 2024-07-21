@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            div.big {
+                display:flex;
+                flex-flow: row wrap;
+                width: 95%;
+                margin: auto;
+            }
+            .big > .table {
+                width: 23%;
+                background-color: mintcream;
+                margin: 5px;
+                padding: 10px;
+            }
+            .div-table {
+                background-color: mintcream;
+                padding: 20px;
+                margin: 5px 10px;
+            }
+            li {
+                width: 95%;
+            }
+            ul {
+                list-style-type: none;
+            }
+            ul.mapped-list .table {
+                width: 95%;
+            }
+            .bad{
+                color:blue;
+            }
+            table {
+                border-spacing: 0px;
+                border: 1px solid black;
+                border-radius: 0.5em;
+            }
+            th {
+                background-color: black;
+                color:white;
+                border-radius:inherit;
+                padding: 5px;
+            }
+            td {
+                padding:5px;
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        {%- block content %}
+            <!-- <h1>JSON Test</h1>
+            <div>{{ json_object }}</div>
+            <h1>Loops</h1>
+            <div class="big">
+                {%- for key, value in json_object.items() recursive %}
+                    {%- if key == 'tablename' %}    
+                        <h1>{{ value|title }}</h1>
+                    {% endif -%}
+                    <div class="table">    
+                        {%- if value is mapping %}
+                            {%- if key != 'tablename' %}
+                                <p class="bad" ><b>{{ key }}</b></p>
+                            {% endif -%}
+                            <ul class="mapped-list">{{ loop(value.items()) }}</ul>
+                        {%- else %}
+                            <li><b>{{ key }}</b>: {{ value }}</li>
+                        {% endif -%}
+                    </div>
+                {% endfor -%}
+            </div> -->
+            <hr>
+            <div class="big">
+                {%- for item in json_object.values() %}  
+                    <div class="div-table">
+                        <h1>{{ item['tablename']|title }}</h1>
+                        <p># of {{ item['tablename'] }}s: {{ item['row_count'] }}</p>
+                        <table>
+                            <thead>
+                                {%- for colkey in item['col_keys'] %}
+                                    <th>{{ colkey|title }}</th>
+                                {% endfor -%}
+                            </thead>
+                            <tbody>
+                                {%- for row in item['rows'].values() %}
+                                    <tr>
+                                        {%- for attr in row.values() %}
+                                            <td>{{ attr }}</td>
+                                        {% endfor -%}
+                                    </tr>
+                                {% endfor -%}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor -%}
+            </div>
+        {% endblock -%}
+    </body>
+</html>

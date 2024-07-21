@@ -1,42 +1,56 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import user_events_panel, event_action_button, event_link, small_event_card %}
 
 {% block content %}
-    <span class="title"><h1>{% block title %} Home {% endblock %}</h1></span>
-    <div id="events">
-        <h1>Welcome, {{ user.fullname }}</h1>
-        {% for event in events %}
-            {% if event.organizer_id == user_id %}
-                <div class="event">
-                    <h3>{{ event.event_name }}</h4>
-                    <p>Date: {{ event.date.strftime("%x") }}</p>
-                    <p>Organizer: {{ user.fullname }} (You)</p>
-                    <p>Description <br> {{ event.description }}</p>
-                    {% if event.type[:9] == "volunteer" %}
-                        <div class="volunteers">Volunteers:
-                            <button><a href="{{ url_for('volunteer', event_id=event.id) }}"> Sign up to Volunteer</a></button>
-                            <br>
-                            <table class="volunteer-table">
-                                <thead>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                </thead>
-                                {% for volunteer in event.volunteers %}
-                                    <tr>
-                                        <td>{{ users.query.get_or_404(volunteer.user_id).fullname }}</td>
-                                        <td>{{ volunteer.type }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                    {% endif %}
-                    <div class="card-actions">
-                        <form class="delete" method="POST" action="{{ url_for('delete_event', event_id=event.id) }}">
-                            <button id="d-s" type="submit">Delete</button>
-                        </form>
-                        <button class="edit"><a href="{{ url_for('edit_event', event_id=event.id) }}">Edit Event</a></button>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+    <span><h1>{% block title %} Your Dashboard {% endblock %}</h1></span>
+    <div class="events-dashboard" >
+        <div class="flex-separator"><h1>Upcoming Events</h1></div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Events Organized</h1>
+            {% for event in events if event.organizer_id == user_id and event.date >= today %}
+                {{ small_event_card('org', event, user_id, event.organizer_name, user, today) }}
+            {% endfor %}
+        </div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Events Participating</h1>
+            {% for event in events %}
+                {% for p in event.attendees if p.user_id == user_id and event.date >= today %}
+                    {{ small_event_card('att', event, p.user_id, event.organizer_name, user, today) }}
+                {% endfor %}
+            {% else %}
+                <p>You are not participating in any events yet.</p>
+            {% endfor %}
+        </div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Events Volunteering</h1>
+            {% for event in events %}
+                {% for v in event.volunteers if v.user_id == user_id and event.date >= today %}
+                    {{ small_event_card('vol', event, v.user_id, event.organizer_name, user, today) }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="flex-separator"><h1>Event History</h1></div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Past Events Organized</h1>
+            {% for event in events if event.organizer_id == user_id and event.date < today %}
+                {{ small_event_card('org', event, user_id, event.organizer_name, user, today) }}
+            {% endfor %}
+        </div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Past Events Participated</h1>
+            {% for event in events %}
+                {% for p in event.attendees if p.user_id == user_id and event.date < today %}
+                    {{ small_event_card('att', event, p.user_id, event.organizer_name, user, today) }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="event-dashboard-column">
+            <h1 class="column-header">Past Events Volunteered</h1>
+            {% for event in events %}
+                {% for v in event.volunteers if v.user_id == user_id and event.date < today %}
+                    {{ small_event_card('vol', event, v.user_id, event.organizer_name, user, today) }}
+                {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

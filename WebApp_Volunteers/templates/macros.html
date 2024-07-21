@@ -1,0 +1,110 @@
+{% macro nav_link(endpoint, name, showActive=True) %} 
+    {% if request.endpoint and request.endpoint.endswith(endpoint) and showActive %} 
+        <a class="active" href="{{ url_for(endpoint) }}">{{ name }}</a>
+    {% else %} 
+        <a href="{{ url_for(endpoint) }}">{{ name }}</a>
+    {% endif %} 
+{% endmacro %}
+
+{% macro logo_nav_link(endpoint, name, filename) %} 
+    <a id="logo-link" href="{{ url_for(endpoint) }}">
+        <img height="35px" width="35px" src="{{ url_for('static', filename=filename) }}">
+        <p>{{ name }}</p>
+    </a>
+{% endmacro %}
+
+{% macro nav_button(endpoint, name, classes="") %}
+    <button class="{{ classes }}">{{ nav_link(endpoint, name, showActive=False) }}</button>
+{% endmacro %}
+
+{% macro signed_out_navbar() %}
+    <nav>
+        {{ logo_nav_link('index', 'AVA', 'img/webapp_logo_cropped1.png')}}
+        <div class="site-pages">
+            {{ nav_link('index', 'Home')}}
+        </div>
+        <div class="account-actions">
+            {{ nav_link('signup', 'Sign up') }}
+            {{ nav_button('login', 'Login', classes="orange") }}
+        </div>
+    </nav>
+{% endmacro %}
+
+{% macro signed_in_navbar(user) %}
+    <nav>
+        {{ logo_nav_link('index', 'AVA', 'img/webapp_logo_cropped1.png')}}
+        <div class="site-pages">
+            {{ nav_link('index', 'Home')}}
+            {{ nav_link('home', 'My Events') }}
+            {{ nav_link('view_all', 'View all data') }}
+            {% if user.role.value == 'Organizer' or user.role.value == 'Admin' %}                           
+                {{ nav_button('create', 'Create Event') }}
+            {% endif %}
+        </div>
+        <div class="account-actions">
+            {{ nav_link('edit_user', user.fullname) }}
+            {% if user.role.code == 'admin'%}
+                {{ nav_link('signup', 'Create New User') }}
+            {% endif %}
+            {{ nav_button('signout', 'Sign out', classes="signout") }}</button>
+    </div>
+    </nav>
+{% endmacro %}
+
+
+{% macro user_events_panel(event_type, event_list, none_message, ev, today) %}
+    <h4>{{ event_type }}</h4>
+    {% for e in event_list if ev.query.get_or_404(e.event_id).date >= today %}
+        {% set event = ev.query.get_or_404(e.event_id) %}
+        {% if loop.index == 1 or (loop.index > 1 and event.date != ev.query.get_or_404(loop.previtem.event_id).date) %}
+            <h4>{{ event.date.strftime("%B %d, %Y") }}</h4>
+        {% endif %}
+        {{ event_link(event) }}
+    {% else %}
+        <p>{{ none_message }}</p>
+    {% endfor %}
+{% endmacro %}
+
+{% macro event_action_button(endpoint, event_id, message) %}
+    {% if 'delete' in endpoint or  'elete' in message %}
+    <form class="delete" method="POST" action="{{ url_for(endpoint, event_id=event_id|int) }}">
+        <button class="delete" type="submit">{{ message }}</button>
+    </form>
+    {% else %}
+        <button class="edit"><a href="{{ url_for(endpoint, event_id=event_id) }}">{{ message }}</a></button>
+    {% endif %}
+{% endmacro %}
+
+{% macro event_link(event, showDate=False) %}
+    <a class="event-link" href="{{ url_for('event', event_id=event.id) }}">{{ event.event_name }} {% if showDate %}<span> - {{ event.date.strftime("%x") }}</span>{% endif %}</a>
+{% endmacro %}
+
+{% macro get_user(user_id, users=users) %}
+    {{ users.query.get_or_404(user_id).fullname }}
+{% endmacro %}
+
+{% macro small_event_card(type, event, user_id, organizer, user, today=today) %}
+    <div class="event-card-small event-card">
+        {{ event_top_desc(event, user) }}
+        {% if event.date >= today %}
+            <div class="card-actions">
+                {% if type == 'vol' %}
+                    {{ event_action_button('unvolunteer', user_id, 'Unvolunteer') }}
+                {% elif type == 'att' %}
+                    {{ event_action_button('unattend', user_id, 'Un-RSVP') }}
+                {% elif type == 'org' %}
+                    {{ event_action_button('delete_event', event.id, 'Delete') }}
+                    {{ event_action_button('edit_event', event.id, 'Edit') }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro event_top_desc(event, user) %}
+    <a href="{{ url_for('event', event_id=event.id) }}"><h3 class="event-title">{{ event.event_name }}</h3></a>
+    <p>Date: {{ event.date.strftime("%#m/%#d/%Y") }}</p>
+    <p>Location: {{ event.location }}</p>
+    <p>Organizer: {{ user.fullname }} {{ '(You)' if user.id == event.organizer_id }}</p>
+    <p>Description <br> {{ event.description }}</p>
+{% endmacro %}

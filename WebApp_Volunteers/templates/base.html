@@ -4,31 +4,23 @@
    <meta charset="UTF-8">
    <title>{% block title %} {% endblock %} 
           | AVA</title>
-   <link rel="stylesheet" type="text/css" 
-         href="{{ url_for('static', filename='css/style.css') }}">
+   <link rel="icon" href="{{ url_for('static', filename='img/webapp_logo_optimized1.png') }}">
+   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-   <nav>
-      <a href="{{ url_for('index') }}">AVA</a>
-      <div class="site-pages">
-         <a href="{{ url_for('index') }}">Home</a>
-         {% if status == True %}
-            <a href="{{ url_for('home', user_id=user_id) }}">My Events</a>
-            <button><a href="{{url_for('create', user_id=user_id) }}">Create Event</a></button>
-         {% endif %}
-      </div>
-      <div class="account-actions">
-         {% if status == False %}
-            <a href="{{ url_for('signup') }}">Sign up</a>
-            <a href="{{ url_for('login') }}">Login</a>
-         {% else %}
-            <a href="{{ url_for('signout') }}">Sign out</a>
-         {% endif %}
-      </div>
-   </nav>
-   <hr>
+   {% from "macros.html" import signed_out_navbar, signed_in_navbar %}
+   {% if status == False %}
+      {{ signed_out_navbar() }}
+   {% else %}
+      {{ signed_in_navbar(user) }}
+   {% endif %}
    <div class="content">
       {% block content %} {% endblock %}
    </div>
+   <footer>
+      {#{% block footer %}
+         &copy; Copyright 2024 by Cameron Joyce
+      {% endblock %}#}
+   </footer>
 </body>
 </html>

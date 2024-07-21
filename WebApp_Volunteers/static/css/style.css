@@ -2,7 +2,6 @@
 body {
     font-family: Georgia, Helvetica, Arial, sans-serif;
     margin: 0;
-    /* padding: 0px 15%; */
     background-color: white;
 }
 
@@ -12,7 +11,7 @@ body * {
 }
 
 .content {
-    margin: 15px 20%;
+    margin: 0;
 }
 
 .title {
@@ -20,7 +19,7 @@ body * {
 }
 
 h1 {
-    width:100%;
+    width: 100%;
 }
 
 a {
@@ -33,23 +32,40 @@ a:hover {
 
 nav {
     background-color: black;
-    height: 30px;
+    height: 75px;
     justify-items: center;
-    align-items: center;
+    align-content: center;
     display: flex;
-    padding: 10px 20%;
+    padding: var(--nav-padding);
     justify-content: space-between;
 }
 
-nav > :is(div, a), nav > div > :is(button, a) {
+nav > :is(div, a), nav > div > :is(button, a), #logo-link * {
     font-size: 14px;
-    margin-left: 45px;
+    margin: 0px 25px;
     text-decoration: none;
     color: white;  
 }
 
-nav a:hover {
+nav :is(div, #logo-link > p) > a:not(.active):hover {
     color:lightgray;
+}
+
+nav div {
+    height: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+nav div a {
+    align-items: flex-start;
+    padding: 15px 0px;
+}
+
+#logo-link {
+    display: flex;
+    align-items: center;
 }
 
 .site-pages {
@@ -65,48 +81,111 @@ nav a:hover {
 }
 
 button {
-    background-color: purple;
-    border-radius: 7px;
-    height: 30px;
+    background-color: var(--purple);
+    border-radius: 3px;
+    height: 50px;
     padding: 5px 15px;
     color: white;
     border: none;
+    display: inline-block;
 }
+
 
 button a {
     text-decoration: none;
     color: white;
 }
 
-input, textarea, select {
-    margin: 5px;
-    padding: 5px;
-    height: 30px;
-    width: 200px;
-    color:black;
-    border: 2px solid lightgray;
-    border-radius: 5px;
+button a:hover {
+    color: var(--card-bg-color)
 }
 
-:is(input, textarea, select):focus-visible {
-    border: 3px solid purple;
+.orange, .active {
+    color: var(--orange);
+}
+
+.active {
+    border-bottom: 5px solid var(--orange);
+}
+
+.active:hover {
+    color: var(--orange-hover);
+}
+
+.purple {
+    color: var(--purple);
+}
+
+button.purple {
+    background-color: var(--purple);
+}
+
+button.orange  {
+    background-color: var(--orange);
+}
+
+button.orange:hover {
+    background-color: var(--orange);
+    color:black;
+}
+
+button.orange:hover a {
+    color: black;
+}
+
+button.orange a:hover {
+    color: black;
+}
+
+
+button:hover {
+    background-color: var(--purple-hover);
+}
+
+/* Form Styling */
+form {
+    margin: 10px auto;
+    width: 25%;
+    border-radius: 0.7em;
+    background-color: lavender;
+    padding: 30px;
+}
+
+.form-actions {
+    display: block;
+    width: 80%;
+    text-align: right;
+    height: auto;
+    margin: inherit;
 }
 
 textarea {
     resize: vertical;
-    font-family: Arial, sans-serif;;
+    font-family: Arial, sans-serif;
+}
+.form-group {
+    margin: 15px auto;
+    width: 80%;
 }
 
-label {
-    width: 200px;
+.form-field {
+    margin: 5px auto;
+    padding: 15px 5px;
+    border: 2px solid purple;
+    border-radius: 3px;
+    width: 100%;
+    font-size: 14pt;
+    background-color: white;
 }
 
-button:hover {
-    background-color: #b31bb3;
+.form-field :not(input[type='submit']) {
+    border: none;
+    background-color: transparent;
+    width: inherit
 }
 
-form {
-    margin: 10px;
+.form-field *:focus-visible {
+    outline: none;
 }
 
 /* event-section container and its children */
@@ -116,8 +195,9 @@ form {
     align-items: start;
     justify-content: center;
     justify-items: stretch;
-    /* display: flex;
-    flex-flow: row nowrap; */
+    max-width: var(--main-width);
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .main-container > div {
@@ -127,83 +207,172 @@ form {
 #events {
     align-items: flex-start;
     display: flex;
-    flex-flow: column wrap;
+    flex-flow: row wrap;
     overflow: hidden;
     justify-content: center;
 }
 
 
-.user-info, .more-info {
+.user-info > div, .more-info > div {
     /* width: 200px; */
     position: sticky;
-    background-color: gainsboro;
+    background-color: var(--card-bg-color);
     border-radius: 10px;
-    padding: 10px;
+    padding: var(--card-padding);
+    margin: 10px;
 }
 
-/* .more-info {
-    width: 250px;
-    position: sticky;
-} */
+.error {
+    height: 50px;
+    width: 130px;
+    font-size: 24px;;
+}
 
+/* Event links */
 .event-link {
-    margin: 5px;
+    margin: 10px;
     display: block;
 }
 
 /* div cards within the event-section */
-#events > div {
+.event-card {
     border-radius: 10px;
-    background-color: gainsboro;
-    /* max-width: 55%; */
+    background-color: var(--card-bg-color);
     margin: 5px;
-    padding: 5px;
+    padding: var(--card-padding);
     display: flex;
     flex-flow: row wrap;
     flex: 1 1 auto;
     align-content: space-between;
 }
 
-#events > div:nth-child(1) {
-    margin-top: 0px;
-}
-
-#events > div:hover {
-    z-index: 1;
-    align-self: flex-start;
-    height: auto;
-    min-height: 110px;
-}
-
 /* each part of a event box */
-#events > div > * {
+.event-card > * {
     margin: 7px;
     width: 100%
 }
 
+.event-single .event-card {
+    padding: var(--card-padding);
+    width:75%;
+    margin: auto;
+}
+
+/* Elements of the My Events Page */
+.events-dashboard {
+    align-items: flex-start;
+    display: flex;
+    flex-flow: row wrap;
+    overflow: hidden;
+    justify-content: center;
+    width: 90%;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.flex-separator {
+    width: 95%;
+    margin-top: 20px;
+    align-self: center;
+}
+
+.event-dashboard-column {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 5px;
+    border: 1px solid lightgrey;
+    width: 32%;
+    height: 400px;
+    overflow-y: scroll;
+
+}
+
+.event-card-small {
+    max-width: 90%;
+    padding: var(--card-padding);
+    margin: 5px 10px;
+}
+
+.column-header {
+    margin-left: 12px;
+}
+
+/* Event details tables */
 :where(.volunteers, .participants) > * {
     margin: 7px;
 }
 
 /* The div containing the edit and delete card buttons */
 .card-actions {
-    display: hidden;
+    display: block;
     width: 100%;
     justify-items: center;
-    justify-content: center;
-    align-items: right;
     text-align: right;
     height: auto;
-    justify-content: space-between;
 }
 
 #events div:hover .card-actions {
     display: inline;
 }
 
+.div-table {
+    padding: 25px;
+    background-color: var(--card-bg-color);
+    border-radius: 10px;
+    margin: 5px auto;
+    width: 90%;
+}
+
 .delete, .edit {
     display: inline-block;
-    width:25%;
+}
+
+.delete {
+    background-color:  #c70000;
+}
+
+.delete:hover {
+    background-color:  #c70000d2;
+}
+
+form.delete {
+    /* background-color: transparent; */
+    width: auto;
+    padding: 0px;
+}
+
+form.delete:hover {
+    background-color: #c70000d2;
+}
+
+.cancel {
+    background-color: transparent;
+    border: 1px solid gray;
+}
+
+.cancel a {
+    color: gray;
+}
+
+.cancel:hover, .cancel:hover a {
+    background-color: gray;
+    color: white;
+}
+
+.signout {
+    border: 1px solid var(--orange);
+    color: black;
+    background-color: transparent;
+}
+.signout a {
+    color: var(--orange);
+}
+
+.signout a:hover, .signout:hover a {
+    color: black;
+}
+.signout:hover {
+    background-color: var(--orange);
 }
 
 table {
@@ -213,6 +382,7 @@ table {
 td, th {
     border: 1.5px solid black;
     padding: 5px;
+    text-align: center;
 }
 
 th {
@@ -221,7 +391,32 @@ th {
     font-weight: normal;
 }
 
-*:disabled {
-    text-decoration: line-through;
-    background-color: crimson;
+:disabled {
+    background-color: #cccccc;
+    opacity: 50%;
+    cursor: not-allowed;
+}
+
+:root {
+    --orange: rgb(255, 117, 24);
+    --orange-hover: #ff7418d2;
+    --purple: rgb(93, 17, 138);
+    --purple-hover: #5e118ad2;
+    --card-bg-color: #E5E4E2;
+    --card-padding: 10px 20px;
+}
+
+@media (max-width: 2000px) {
+    :root {
+        --nav-padding: 0px calc(1rem * 20);
+        --main-width: 75%;
+    }
+}
+
+
+@media (max-width: 1280px) {
+    :root {
+        --nav-padding: 0px 25px;
+        --main-width: 100%;
+    }
 }
